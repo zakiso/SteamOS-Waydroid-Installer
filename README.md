@@ -224,7 +224,20 @@ SteamOS has been stuck on 6.1.52-valve16-1 for several releases now so I think t
    git clone --depth=1 -b testing https://github.com/ryanrudolfoba/steamos-waydroid-installer
    ```
 
-3. Execute the script! \
+3. **OPTIONAL - Pre-download Android Images (Recommended for Slow/Proxy Networks)**
+   
+   If you have slow internet or need to use a proxy, you can pre-download the Android images:
+   
+   ```sh
+   cd ~/steamos-waydroid-installer
+   chmod +x download-android-images.sh
+   ./download-android-images.sh
+   ```
+   
+   The script will ask if you want to use a proxy and guide you through downloading the images.
+   You can also manually download images - see `waydroid/README.md` for more details.
+
+4. Execute the script! \
 
    ```sh
    cd ~/steamos-waydroid-installer
@@ -232,8 +245,8 @@ SteamOS has been stuck on 6.1.52-valve16-1 for several releases now so I think t
    ./steamos-waydroid-installer.sh
    ```
 
-4. Script will automatically install Waydroid together with the custom config. Install will roughly take around 5mins depending on the internet connection speed.
-5. Once done exit the script and go back to Game Mode.
+5. Script will automatically install Waydroid together with the custom config. If you pre-downloaded images in step 3, they will be used automatically. Install will roughly take around 5mins depending on the internet connection speed.
+6. Once done exit the script and go back to Game Mode.
 
 **Launching Waydroid**
 1. Go to Game Mode.

@@ -26,10 +26,67 @@ ANDROID13_TV_IMG=https://github.com/ryanrudolfoba/SteamOS-Waydroid-Installer/rel
 # android TV hash
 ANDROID13_TV_IMG_HASH=2ac5d660c3e32b8298f5c12c93b1821bc7ccefbd7cfbf5fee862e169aa744f4c
 
+# proxy variables
+USE_PROXY=false
+PROXY_URL=""
+
 echo script version: $script_version_sha
 
 # define functions here
 source functions.sh
+
+# proxy configuration
+setup_proxy() {
+	local proxy_choice
+	proxy_choice=$(zenity --width 800 --height 300 --list --radiolist \
+		--title "代理配置 - Proxy Configuration" \
+		--column "选择" \
+		--column "选项" \
+		--column "说明" \
+		TRUE "NO_PROXY" "不使用代理 (No proxy - direct connection)" \
+		FALSE "USE_PROXY" "配置代理服务器 (Configure proxy server)")
+	
+	if [ $? -eq 1 ]; then
+		echo User cancelled proxy configuration. Exiting.
+		exit 0
+	fi
+	
+	if [ "$proxy_choice" == "USE_PROXY" ]; then
+		PROXY_URL=$(zenity --entry \
+			--title "代理配置 - Proxy Configuration" \
+			--text "请输入代理服务器地址 (支持 HTTP/HTTPS/SOCKS5)\n\nPlease enter proxy server URL (supports HTTP/HTTPS/SOCKS5)\n\n示例 Examples:\nHTTP:  http://proxy.example.com:8080\nHTTPS: https://proxy.example.com:8080\nSOCKS5: socks5://proxy.example.com:1080\n\n如需认证 With authentication:\nhttp://username:password@proxy.example.com:8080" \
+			--width 600 \
+			--height 200)
+		
+		if [ $? -eq 1 ] || [ -z "$PROXY_URL" ]; then
+			echo No proxy URL provided. Using direct connection.
+			USE_PROXY=false
+		else
+			USE_PROXY=true
+			echo "代理已配置 Proxy configured: $PROXY_URL"
+			
+			# Set environment variables for various tools
+			export http_proxy="$PROXY_URL"
+			export https_proxy="$PROXY_URL"
+			export HTTP_PROXY="$PROXY_URL"
+			export HTTPS_PROXY="$PROXY_URL"
+			export all_proxy="$PROXY_URL"
+			export ALL_PROXY="$PROXY_URL"
+			
+			# Configure git to use proxy
+			git config --global http.proxy "$PROXY_URL"
+			git config --global https.proxy "$PROXY_URL"
+			
+			echo "代理环境变量已设置 Proxy environment variables set."
+		fi
+	else
+		USE_PROXY=false
+		echo "使用直连模式 Using direct connection (no proxy)."
+	fi
+}
+
+# Call proxy setup
+setup_proxy
 
 # run the sanity checks
 source sanity-checks.sh
@@ -214,13 +271,23 @@ else
 		elif [ "$Choice" == "A13_GAPPS" ]
 		then
 			echo Initializing Waydroid.
-			echo -e "$current_password\n" | sudo -S waydroid init -s GAPPS
+			if [ "$USE_PROXY" == "true" ] && [ -n "$PROXY_URL" ]; then
+				echo "使用代理初始化 Waydroid Initializing Waydroid via proxy"
+				echo -e "$current_password\n" | sudo -S http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" waydroid init -s GAPPS
+			else
+				echo -e "$current_password\n" | sudo -S waydroid init -s GAPPS
+			fi
 			check_waydroid_init
 
 		elif [ "$Choice" == "A13_NO_GAPPS" ]
 		then
 			echo Initializing Waydroid.
-			echo -e "$current_password\n" | sudo -S waydroid init
+			if [ "$USE_PROXY" == "true" ] && [ -n "$PROXY_URL" ]; then
+				echo "使用代理初始化 Waydroid Initializing Waydroid via proxy"
+				echo -e "$current_password\n" | sudo -S http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" waydroid init
+			else
+				echo -e "$current_password\n" | sudo -S waydroid init
+			fi
 			check_waydroid_init
 
 		elif [ "$Choice" == "TV13_NO_GAPPS" ]
@@ -232,7 +299,12 @@ else
 			echo -e "$current_password\n" | sudo -S cp extras/ATV-Generic.kl /var/lib/waydroid/overlay/system/usr/keylayout/Generic.kl
 
 			echo Initializing Waydroid.
- 			echo -e "$current_password\n" | sudo -S waydroid init
+			if [ "$USE_PROXY" == "true" ] && [ -n "$PROXY_URL" ]; then
+				echo "使用代理初始化 Waydroid Initializing Waydroid via proxy"
+				echo -e "$current_password\n" | sudo -S http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" waydroid init
+			else
+				echo -e "$current_password\n" | sudo -S waydroid init
+			fi
 			check_waydroid_init
 			
 		fi
@@ -439,6 +511,9 @@ then
 	echo Re-enabling the Decky Loader plugin loader service.
 	echo -e "$current_password\n" | sudo -S systemctl start plugin_loader.service
 fi
+
+# cleanup proxy settings before exiting
+cleanup_proxy
 
 if zenity --question --text="Do you Want to Return to Gaming Mode?"; then
 	qdbus org.kde.Shutdown /Shutdown org.kde.Shutdown.logout

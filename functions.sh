@@ -32,8 +32,27 @@ cleanup_exit () {
 		echo -e "$current_password\n" | sudo -S systemctl start plugin_loader.service
 	fi
 	
+	# cleanup proxy settings
+	cleanup_proxy
+	
 	echo Cleanup completed. Please open an issue on the GitHub repo or leave a comment on the YT channel - 10MinuteSteamDeckGamer.
 	exit
+}
+
+cleanup_proxy () {
+	# call this function to cleanup proxy settings
+	if [ "$USE_PROXY" == "true" ]; then
+		echo "清理代理设置 Cleaning up proxy configuration..."
+		git config --global --unset http.proxy &> /dev/null
+		git config --global --unset https.proxy &> /dev/null
+		unset http_proxy
+		unset https_proxy
+		unset HTTP_PROXY
+		unset HTTPS_PROXY
+		unset all_proxy
+		unset ALL_PROXY
+		echo "代理设置已清理 Proxy configuration cleaned up."
+	fi
 }
 
 prepare_custom_image_location () {
@@ -53,7 +72,15 @@ download_image () {
 	local hash
 
 	echo Downloading $name image
-	echo -e "$current_password\n" | sudo -S curl -o $dest_zip $src -L
+	
+	# Add proxy support for curl if proxy is configured
+	if [ "$USE_PROXY" == "true" ] && [ -n "$PROXY_URL" ]; then
+		echo "使用代理下载 Downloading via proxy: $PROXY_URL"
+		echo -e "$current_password\n" | sudo -S http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" curl -o $dest_zip $src -L
+	else
+		echo -e "$current_password\n" | sudo -S curl -o $dest_zip $src -L
+	fi
+	
 	hash=$(sha256sum "$dest_zip" | awk '{print $1}')
 	# Verify the hash
 	if [[ "$hash" != "$src_hash" ]]; then
@@ -69,7 +96,15 @@ download_image () {
 install_android_extras () {
 	# casualsnek / aleasto waydroid_script - install libndk and widevine
 	python3 -m venv $WAYDROID_SCRIPT_DIR/venv
-	$WAYDROID_SCRIPT_DIR/venv/bin/pip install -r $WAYDROID_SCRIPT_DIR/requirements.txt &> /dev/null
+	
+	# Add proxy support for pip if proxy is configured
+	local pip_cmd="$WAYDROID_SCRIPT_DIR/venv/bin/pip install"
+	if [ "$USE_PROXY" == "true" ] && [ -n "$PROXY_URL" ]; then
+		echo "使用代理安装 Python 包 Installing Python packages via proxy"
+		pip_cmd="$WAYDROID_SCRIPT_DIR/venv/bin/pip install --proxy $PROXY_URL"
+	fi
+	
+	$pip_cmd -r $WAYDROID_SCRIPT_DIR/requirements.txt &> /dev/null
 
 	if [ "$Choice" == "A13_NO_GAPPS" ] || [ "$Choice" == "A13_GAPPS" ]
 	then
