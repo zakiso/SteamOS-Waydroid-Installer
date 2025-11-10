@@ -76,7 +76,7 @@ download_image () {
 	# Add proxy support for curl if proxy is configured
 	if [ "$USE_PROXY" == "true" ] && [ -n "$PROXY_URL" ]; then
 		echo "使用代理下载 Downloading via proxy: $PROXY_URL"
-		echo -e "$current_password\n" | sudo -S http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" curl -o $dest_zip $src -L
+		echo -e "$current_password\n" | sudo -S env http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL" curl -o $dest_zip $src -L
 	else
 		echo -e "$current_password\n" | sudo -S curl -o $dest_zip $src -L
 	fi
@@ -108,7 +108,13 @@ install_android_extras () {
 
 	if [ "$Choice" == "A13_NO_GAPPS" ] || [ "$Choice" == "A13_GAPPS" ]
 	then
-		echo -e "$current_password\n" | sudo -S $WAYDROID_SCRIPT_DIR/venv/bin/python3 $WAYDROID_SCRIPT_DIR/main.py -a13 install {libndk,widevine}
+		# Add proxy support for waydroid_script downloads
+		if [ "$USE_PROXY" == "true" ] && [ -n "$PROXY_URL" ]; then
+			echo "使用代理运行 waydroid_script Running waydroid_script via proxy"
+			echo -e "$current_password\n" | sudo -S env http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL" $WAYDROID_SCRIPT_DIR/venv/bin/python3 $WAYDROID_SCRIPT_DIR/main.py -a13 install {libndk,widevine}
+		else
+			echo -e "$current_password\n" | sudo -S $WAYDROID_SCRIPT_DIR/venv/bin/python3 $WAYDROID_SCRIPT_DIR/main.py -a13 install {libndk,widevine}
+		fi
 	fi
 
 	echo casualsnek / aleasto waydroid_script done.

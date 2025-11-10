@@ -270,10 +270,14 @@ else
 
 		elif [ "$Choice" == "A13_GAPPS" ]
 		then
+			echo "======================================"
+			echo "用户选择 / User selected: A13_GAPPS"
+			echo "带 Google Play 服务 / With Google Play Services"
+			echo "======================================"
 			echo Initializing Waydroid.
 			if [ "$USE_PROXY" == "true" ] && [ -n "$PROXY_URL" ]; then
 				echo "使用代理初始化 Waydroid Initializing Waydroid via proxy"
-				echo -e "$current_password\n" | sudo -S http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" waydroid init -s GAPPS
+				echo -e "$current_password\n" | sudo -S env http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL" waydroid init -s GAPPS
 			else
 				echo -e "$current_password\n" | sudo -S waydroid init -s GAPPS
 			fi
@@ -281,10 +285,14 @@ else
 
 		elif [ "$Choice" == "A13_NO_GAPPS" ]
 		then
+			echo "======================================"
+			echo "用户选择 / User selected: A13_NO_GAPPS"
+			echo "不带 Google Play 服务 / Without Google Play Services"
+			echo "======================================"
 			echo Initializing Waydroid.
 			if [ "$USE_PROXY" == "true" ] && [ -n "$PROXY_URL" ]; then
 				echo "使用代理初始化 Waydroid Initializing Waydroid via proxy"
-				echo -e "$current_password\n" | sudo -S http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" waydroid init
+				echo -e "$current_password\n" | sudo -S env http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL" waydroid init
 			else
 				echo -e "$current_password\n" | sudo -S waydroid init
 			fi
@@ -292,6 +300,10 @@ else
 
 		elif [ "$Choice" == "TV13_NO_GAPPS" ]
 		then
+			echo "======================================"
+			echo "用户选择 / User selected: TV13_NO_GAPPS"
+			echo "Android TV 版本 / Android TV version"
+			echo "======================================"
 			prepare_custom_image_location
 			download_image $ANDROID13_TV_IMG $ANDROID13_TV_IMG_HASH ~/waydroid/custom/android13tv "Android 13 TV"
 
@@ -301,7 +313,7 @@ else
 			echo Initializing Waydroid.
 			if [ "$USE_PROXY" == "true" ] && [ -n "$PROXY_URL" ]; then
 				echo "使用代理初始化 Waydroid Initializing Waydroid via proxy"
-				echo -e "$current_password\n" | sudo -S http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" waydroid init
+				echo -e "$current_password\n" | sudo -S env http_proxy="$PROXY_URL" https_proxy="$PROXY_URL" HTTP_PROXY="$PROXY_URL" HTTPS_PROXY="$PROXY_URL" waydroid init
 			else
 				echo -e "$current_password\n" | sudo -S waydroid init
 			fi

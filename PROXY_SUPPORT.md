@@ -18,7 +18,8 @@ This script now supports downloading Waydroid images and dependencies through a 
 2. **curl** - 下载镜像文件 / Image file downloads
 3. **waydroid init** - 初始化 Waydroid / Waydroid initialization
 4. **pip** - Python 包安装 / Python package installation
-5. **pacman** - 通过环境变量 / Via environment variables
+5. **waydroid_script** - libndk/widevine 下载 / libndk/widevine downloads
+6. **pacman** - 通过环境变量 / Via environment variables
 
 ## 使用方法 / Usage
 
