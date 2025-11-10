@@ -55,6 +55,7 @@ setup_proxy() {
 		PROXY_URL=$(zenity --entry \
 			--title "代理配置 - Proxy Configuration" \
 			--text "请输入代理服务器地址 (支持 HTTP/HTTPS/SOCKS5)\n\nPlease enter proxy server URL (supports HTTP/HTTPS/SOCKS5)\n\n示例 Examples:\nHTTP:  http://proxy.example.com:8080\nHTTPS: https://proxy.example.com:8080\nSOCKS5: socks5://proxy.example.com:1080\n\n如需认证 With authentication:\nhttp://username:password@proxy.example.com:8080" \
+			--entry-text "http://192.168.0.103:7890" \
 			--width 600 \
 			--height 200)
 		

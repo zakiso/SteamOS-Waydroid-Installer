@@ -129,6 +129,28 @@ The script automatically cleans up proxy configuration on exit.
 - 查看终端输出中的代理信息 / Check terminal output for proxy messages
 - 确认代理支持所需的协议 / Verify proxy supports required protocols
 
+### waydroid_script 下载超时 / waydroid_script Download Timeout
+
+**症状 / Symptoms:**
+```
+TimeoutError: [Errno 110] Connection timed out
+```
+
+**原因 / Cause:**
+waydroid_script 下载 libndk/widevine 时需要代理支持
+waydroid_script needs proxy to download libndk/widevine
+
+**解决方案 / Solution:**
+✅ **已修复** / **FIXED** - 脚本现在会传递代理环境变量给 waydroid_script
+Script now passes proxy environment variables to waydroid_script
+
+如果仍有问题，手动设置 / If still having issues, manually set:
+```bash
+export http_proxy="http://proxy:port"
+export https_proxy="http://proxy:port"
+sudo -E waydroid-script-command
+```
+
 ## 注意事项 / Notes
 
 1. 代理配置仅在脚本运行期间有效 / Proxy configuration is only active during script execution
